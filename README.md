@@ -1,20 +1,5 @@
-### `Run DB`
+### `Run All`
 ```
-cd api/
-npm i 
-npm start start:services
+docker-compose rm --force && docker-compose up --build
 ```
 
-### `Run API`
-```
-cd api/
-npm i 
-npm start
-```
-
-### `Run Frontend`
-```
-cd frontend/
-npm i 
-npm start
-```
