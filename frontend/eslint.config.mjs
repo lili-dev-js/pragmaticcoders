@@ -3,15 +3,18 @@ import eslintPluginPrettier from 'eslint-plugin-prettier';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import tseslint from 'typescript-eslint';
 
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: true,
-});
-
 
 export default [
     ...tseslint.configs.recommended,
-    ...compat.extends(['eslint:recommended', 'plugin:react/recommended']),
+    {
+        plugins: { react: eslintPluginReact },
+        rules: {
+            'react/react-in-jsx-scope': 'off',
+        },
+        settings: {
+            react: { version: 'detect' },
+        },
+    },
     {
         ignores: ['src/components/ui','dist/', 'node_modules/', 'build/'],
         files: ['**/*.ts', '**/*.tsx'],
