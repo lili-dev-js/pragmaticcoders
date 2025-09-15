@@ -1,8 +1,10 @@
 import { Knex } from "knex";
 import { SkillEntity, skillEntitySchema } from "app/entities/SkillEntity";
 import { Table } from "app/storages/DbSchema";
-import { z } from "zod";
+import { util, z } from "zod";
 import { SkillsStorage } from "app/storages/SkillsStorage";
+
+import Omit = util.Omit;
 
 export class SkillsDbStorage implements SkillsStorage {
   constructor(private readonly database: Knex) {}
@@ -22,5 +24,15 @@ export class SkillsDbStorage implements SkillsStorage {
       .returning("*");
 
     return skillEntitySchema.parse(result);
+  }
+
+  async delete(skillId: number): Promise<void> {
+    const deletedCount = await this.database(Table.Skills)
+      .where({ skillId })
+      .del();
+
+    if (deletedCount === 0) {
+      throw new Error(`Skill with id ${skillId} not found`);
+    }
   }
 }

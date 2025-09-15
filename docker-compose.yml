@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    container_name: fullstack-interview-postgres
+    container_name: postgres
     image: postgres:16.1-bullseye
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -11,14 +11,52 @@ services:
       DATABASE: fullstack_interview_dev_local
       DATABASE_TESTS: fullstack_interview_dev_tests
     volumes:
-      - ./scripts/db/init:/docker-entrypoint-initdb.d
+      - ./api/scripts/db/init:/docker-entrypoint-initdb.d
     ports:
       - "5434:5432"
     networks:
-      - postgres
-    # To log all queries:
-    # command: ["postgres", "-c", "log_statement=all"]
+      - node-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    networks:
+      - node-network
+    volumes:
+      - /app/node_modules
+      - ./api/config:/app/config
+      - ./api/src:/app/src
+    tty: true
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run start
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: frontend
+    networks:
+      - node-network
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/config:/app/config
+      - ./frontend/public:/app/public
+      - /app/node_modules
+    tty: true
+    ports:
+      - "3000:3000"
 
 networks:
-  postgres:
+  node-network:
     driver: bridge
