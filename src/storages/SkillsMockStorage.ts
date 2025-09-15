@@ -18,4 +18,12 @@ export class SkillsMockStorage implements SkillsStorage {
     this.skills.push(skillEntity);
     return skillEntity;
   }
+
+  async delete(skillId: number): Promise<void> {
+    const index = this.skills.findIndex(s => s.skillId === skillId);
+    if (index === -1) {
+      throw new Error(`Skill with id ${skillId} not found`);
+    }
+    this.skills.splice(index, 1);
+  }
 }
